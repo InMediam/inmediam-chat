@@ -59,8 +59,7 @@ export function CreateChamadoForm({
     staleTime: 1000 * 60 * 5,
   })
 
-  const isEmptyCategorias =
-    !isLoadingCategorias && categorias?.data.length === 0
+  const isEmptyCategorias = isLoadingCategorias || categorias?.data.length === 0
 
   const categoriaId = watch('categoria_id')
   const locacaoSelecionadaId = Number(watch('locacao_id')) || null
