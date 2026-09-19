@@ -12,7 +12,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { MessageCirclePlus } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -62,6 +62,17 @@ export function CreateChamadoDialog() {
     ),
     defaultValues,
   })
+
+  const { setValue } = form
+
+  useEffect(
+    function seedLocacaoDaTela() {
+      if (locacaoId === undefined) return
+
+      setValue('locacao_id', String(locacaoId))
+    },
+    [locacaoId, setValue],
+  )
 
   function handleAddAnexos(files: File[]) {
     anexos.addFiles(files)

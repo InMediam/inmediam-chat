@@ -7,6 +7,7 @@ export type {
   ChatDetailsTabOption,
   ChatRealtime,
   ChatRealtimeChannel,
+  FetchLocacoesParams,
 } from './adapter/chat-adapter'
 export { CHAT_DETAILS_TAB } from './adapter/chat-adapter'
 export { ChatProvider } from './adapter/chat-provider'

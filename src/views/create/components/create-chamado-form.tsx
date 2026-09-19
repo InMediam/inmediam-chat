@@ -17,7 +17,6 @@ import { useChatCopy } from '../../../adapter/use-chat-copy'
 import { useChatHttp } from '../../../adapter/use-chat-http'
 import { getCategorias } from '../../../api/get-categorias'
 import type { AnexoPreview } from '../../../hooks/use-chamado-anexos'
-import { useChamadosChat } from '../../../hooks/use-chamados-chat'
 import { upperCaseFirstLetter } from '../../../utils/formatter/text-formatter'
 import { ChamadoSchema } from '../../../validations/chamado-schema'
 import { CreateChamadoAnexosField } from './create-chamado-anexos-field'
@@ -35,8 +34,7 @@ export function CreateChamadoForm({
   onAddAnexos,
   onRemoveAnexo,
 }: CreateChamadoFormProps) {
-  const { locacaoId } = useChamadosChat()
-  const { capabilities, fetchLocacoes } = useChatAdapter()
+  const { capabilities } = useChatAdapter()
   const http = useChatHttp()
   const copy = useChatCopy()
   const {
@@ -53,12 +51,6 @@ export function CreateChamadoForm({
     staleTime: Infinity,
   })
 
-  const { data: locacoes, isPending: isLoadingLocacoes } = useQuery({
-    queryKey: ['chamados', 'locacoes'],
-    queryFn: fetchLocacoes,
-    staleTime: 1000 * 60 * 5,
-  })
-
   const isEmptyCategorias = isLoadingCategorias || categorias?.data.length === 0
 
   const categoriaId = watch('categoria_id')
@@ -66,10 +58,6 @@ export function CreateChamadoForm({
   const assuntos =
     categorias?.data.find((categoria) => String(categoria.id) === categoriaId)
       ?.assuntos ?? []
-
-  const locacaoOptions = locacaoId
-    ? (locacoes?.filter((locacao) => locacao.id === locacaoId) ?? [])
-    : (locacoes ?? [])
 
   function handleAssuntoChange(value: string) {
     setValue('assunto_id', value, { shouldValidate: true })
@@ -152,11 +140,7 @@ export function CreateChamadoForm({
         <Label required htmlFor="locacao_id">
           Imóvel
         </Label>
-        <CreateChamadoImovelField
-          locacoes={locacaoOptions}
-          isLoading={isLoadingLocacoes}
-          isLocked={locacaoId !== undefined}
-        />
+        <CreateChamadoImovelField />
         {errors.locacao_id && <HintText>{errors.locacao_id.message}</HintText>}
       </InputItemsWrapper>
 

@@ -10,6 +10,11 @@ export interface ChatCurrentUser {
   avatar: string | null
 }
 
+export interface FetchLocacoesParams {
+  locacaoId?: number
+  search?: string
+}
+
 export interface ChatCapabilities {
   createChamado: boolean
   selectDestinatario: boolean
@@ -84,7 +89,7 @@ export interface ChatAdapter {
    * não pode depender de publicar versão nova.
    */
   destinatariosIndisponiveis?: ParticipanteTipo[]
-  fetchLocacoes: () => Promise<LocacaoChamado[]>
+  fetchLocacoes: (params: FetchLocacoesParams) => Promise<LocacaoChamado[]>
   copy?: Partial<ChatCopy>
   detailsTabs?: ChatDetailsTabOption[]
 }
