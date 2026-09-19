@@ -13,8 +13,6 @@ export function ChatMessageActions({
   onAttach,
   onSend,
 }: ChatMessageActionsProps) {
-  // onMouseDown em vez de onClick: o clique no clipe não pode roubar o foco do
-  // campo, senão o composer colapsa antes de abrir o seletor de arquivos.
   function handleAttachMouseDown(event: React.MouseEvent) {
     event.preventDefault()
     onAttach()

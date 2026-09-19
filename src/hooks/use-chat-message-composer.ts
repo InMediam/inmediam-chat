@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useChatHttp } from '../adapter/use-chat-http'
@@ -17,15 +17,16 @@ export type UploadPhase = 'presigning' | 'uploading' | 'saving'
 
 export const UPLOAD_PHASE_LABEL: Record<UploadPhase, string> = {
   presigning: 'Preparando...',
-  uploading: 'Enviando...',
-  saving: 'Salvando...',
+  uploading: 'Enviando anexos...',
+  saving: 'Enviando...',
 }
 
-// O upload ocupa a faixa de 5% a 93% da barra: os 5% iniciais cobrem o
-// presign e o trecho final fica reservado para a gravação da mensagem.
-const UPLOAD_START_PERCENT = 5
-const UPLOAD_RANGE_PERCENT = 88
-const SAVING_PERCENT = 97
+const UPLOAD_START_PERCENT = 8
+const UPLOAD_RANGE_PERCENT = 77
+const SAVING_CEILING_PERCENT = 97
+
+const TRICKLE_INTERVAL_MS = 200
+const TRICKLE_FACTOR = 0.18
 
 export function useChatMessageComposer() {
   const queryClient = useQueryClient()
@@ -37,6 +38,26 @@ export function useChatMessageComposer() {
   const [phase, setPhase] = useState<UploadPhase | null>(null)
 
   const isSending = progress !== null
+
+  useEffect(
+    function trickleWhileWaitingForServer() {
+      if (phase === null || phase === 'uploading') return
+
+      const ceiling =
+        phase === 'presigning' ? UPLOAD_START_PERCENT : SAVING_CEILING_PERCENT
+
+      const interval = window.setInterval(() => {
+        setProgress((current) =>
+          current === null
+            ? current
+            : current + (ceiling - current) * TRICKLE_FACTOR,
+        )
+      }, TRICKLE_INTERVAL_MS)
+
+      return () => window.clearInterval(interval)
+    },
+    [phase],
+  )
 
   const { mutateAsync: enviarMensagem } = useMutation({
     mutationFn: (body: SendMensagemBody) => sendMensagem(http, body),
@@ -120,7 +141,6 @@ export function useChatMessageComposer() {
       }
     }
 
-    setProgress(SAVING_PERCENT)
     setPhase('saving')
 
     try {
@@ -131,7 +151,6 @@ export function useChatMessageComposer() {
         anexos: anexosPayload.length > 0 ? anexosPayload : undefined,
       })
     } catch {
-      // O onError da mutation já exibiu o toast com a mensagem do backend.
       resetUpload()
       return
     }

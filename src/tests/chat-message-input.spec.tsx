@@ -59,15 +59,15 @@ describe('ChatMessageInput', () => {
     renderInput()
 
     expect(
-      screen.getAllByPlaceholderText('Escreva sua mensagem...'),
-    ).not.toHaveLength(0)
+      screen.getByPlaceholderText('Escreva sua mensagem...'),
+    ).toBeInTheDocument()
   })
 
   it('guarda o texto digitado no rascunho do chamado', async () => {
     const user = setupUser()
     renderInput()
 
-    const [input] = screen.getAllByPlaceholderText('Escreva sua mensagem...')
+    const input = screen.getByPlaceholderText('Escreva sua mensagem...')
     await user.type(input, 'Olá')
 
     expect(input).toHaveValue('Olá')
@@ -77,12 +77,10 @@ describe('ChatMessageInput', () => {
     const user = setupUser()
     renderInput()
 
-    const [input] = screen.getAllByPlaceholderText('Escreva sua mensagem...')
+    const input = screen.getByPlaceholderText('Escreva sua mensagem...')
     await user.type(input, 'Olá')
 
-    const [sendButton] = screen.getAllByRole('button', {
-      name: 'Enviar mensagem',
-    })
+    const sendButton = screen.getByRole('button', { name: 'Enviar mensagem' })
     await user.click(sendButton)
 
     expect(sendMensagem).toHaveBeenCalledWith(expect.anything(), {
@@ -96,9 +94,7 @@ describe('ChatMessageInput', () => {
     const user = setupUser()
     renderInput()
 
-    const [sendButton] = screen.getAllByRole('button', {
-      name: 'Enviar mensagem',
-    })
+    const sendButton = screen.getByRole('button', { name: 'Enviar mensagem' })
     await user.click(sendButton)
 
     expect(sendMensagem).not.toHaveBeenCalled()
@@ -108,8 +104,8 @@ describe('ChatMessageInput', () => {
     renderInput()
 
     expect(
-      screen.getAllByRole('button', { name: 'Adicionar anexo' }),
-    ).not.toHaveLength(0)
-    expect(screen.getAllByRole('button', { name: 'Emoji' })).not.toHaveLength(0)
+      screen.getByRole('button', { name: 'Adicionar anexo' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Emoji' })).toBeInTheDocument()
   })
 })

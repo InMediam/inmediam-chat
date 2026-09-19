@@ -1,12 +1,14 @@
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
+import type { ChatCurrentUser } from '../adapter/chat-adapter'
 import { useChatAdapter } from '../adapter/use-chat-adapter'
 import type { GetMensagensResponse } from '../api/get-mensagens'
 import type { MensagemTipo } from '../entities/enum'
 import { MENSAGEM_TIPO } from '../entities/enum'
 import type { MensagemItem } from '../entities/interface'
 import type { ParticipanteTipo } from '../entities/tipo-participante'
+import { appendMensagemToCache } from './use-chamado-cache'
 import { chamadoMensagensQueryKey } from './use-chamado-mensagens'
 
 export interface EchoMensagemPayload {
@@ -27,13 +29,14 @@ export interface EchoMensagemPayload {
 
 /**
  * O broadcast é um payload só para todos os ouvintes, então `is_me` não pode
- * vir dele: cada lado resolve comparando o tipo do remetente com o seu. O tipo
- * basta porque a conversa tem apenas duas partes — usar o id seria pior, já
- * que locatário, proprietário e imobiliária vêm de tabelas distintas.
+ * vir dele: cada lado resolve comparando a identidade do remetente com a sua.
+ * A comparação é pelo par tipo + id porque a conversa nem sempre tem tipos
+ * distintos dos dois lados — no chamado para a InMediam ambos são
+ * `imobiliaria`.
  */
 export function payloadToMensagem(
   payload: EchoMensagemPayload,
-  currentTipo: ParticipanteTipo | null,
+  currentUser: ChatCurrentUser | null,
 ): MensagemItem {
   const { mensagem } = payload
 
@@ -45,7 +48,10 @@ export function payloadToMensagem(
       id: mensagem.remetente.id,
       nome: mensagem.remetente.nome,
       tipo: mensagem.remetente.tipo,
-      is_me: currentTipo !== null && mensagem.remetente.tipo === currentTipo,
+      is_me:
+        currentUser !== null &&
+        mensagem.remetente.tipo === currentUser.tipo &&
+        mensagem.remetente.id === currentUser.id,
     },
     created_at: mensagem.created_at,
     readed_at: mensagem.readed_at,
@@ -54,7 +60,8 @@ export function payloadToMensagem(
 
 export function useChamadosRealtime() {
   const queryClient = useQueryClient()
-  const { realtimeChannel, getRealtime, onRealtimeReconnect } = useChatAdapter()
+  const { realtimeChannel, getRealtime, onRealtimeReconnect, currentUser } =
+    useChatAdapter()
 
   useEffect(() => {
     if (!realtimeChannel) return
@@ -64,7 +71,13 @@ export function useChamadosRealtime() {
 
     const channel = realtime.private(realtimeChannel)
 
-    const handler = () => {
+    const handler = (payload: EchoMensagemPayload) => {
+      appendMensagemToCache(
+        queryClient,
+        payload.mensagem.chamado_id,
+        payloadToMensagem(payload, currentUser),
+      )
+
       queryClient.invalidateQueries({ queryKey: ['chamados', 'lista'] })
     }
 
@@ -99,7 +112,7 @@ export function useChamadosRealtime() {
       channel.stopListening('.mensagens.lidas')
       realtime.leave(realtimeChannel)
     }
-  }, [realtimeChannel, getRealtime, queryClient])
+  }, [realtimeChannel, getRealtime, queryClient, currentUser])
 
   useEffect(() => {
     if (!onRealtimeReconnect) return

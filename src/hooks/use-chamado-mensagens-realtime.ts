@@ -11,7 +11,6 @@ import {
 export function useChamadoMensagensRealtime(chamadoId: number | null) {
   const queryClient = useQueryClient()
   const { currentUser, getRealtime } = useChatAdapter()
-  const currentTipo = currentUser?.tipo ?? null
 
   useEffect(() => {
     if (!chamadoId) return
@@ -23,7 +22,7 @@ export function useChamadoMensagensRealtime(chamadoId: number | null) {
     const channel = realtime.private(channelName)
 
     const handler = (payload: EchoMensagemPayload) => {
-      const mensagem = payloadToMensagem(payload, currentTipo)
+      const mensagem = payloadToMensagem(payload, currentUser)
       appendMensagemToCache(queryClient, chamadoId, mensagem)
     }
 
@@ -33,5 +32,5 @@ export function useChamadoMensagensRealtime(chamadoId: number | null) {
       channel.stopListening('.mensagem.criada')
       realtime.leave(channelName)
     }
-  }, [chamadoId, currentTipo, getRealtime, queryClient])
+  }, [chamadoId, currentUser, getRealtime, queryClient])
 }

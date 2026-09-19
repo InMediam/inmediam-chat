@@ -29,6 +29,7 @@ export function createChatAdapterStub(
     isAuthenticated: true,
     currentUser: {
       tipo: PARTICIPANTE_TIPO.IMOBILIARIA,
+      id: 1,
       nome: 'Imobiliária Teste',
       avatar: null,
     },

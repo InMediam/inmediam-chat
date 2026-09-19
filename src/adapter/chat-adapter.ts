@@ -4,12 +4,8 @@ import type { LocacaoChamado } from '../entities/interface'
 import type { ParticipanteTipo } from '../entities/tipo-participante'
 
 export interface ChatCurrentUser {
-  /**
-   * Lado da conversa em que esta instalação está. É o que decide o alinhamento
-   * da bolha: o id não serve para isso porque locatário, proprietário e
-   * imobiliária vivem em tabelas distintas e seus ids colidem entre si.
-   */
   tipo: ParticipanteTipo
+  id: number
   nome: string | null
   avatar: string | null
 }
