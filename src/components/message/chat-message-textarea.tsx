@@ -34,7 +34,7 @@ export function ChatMessageTextarea({
       onChange={(event) => onChange(event.target.value)}
       onKeyDown={onKeyDown}
       placeholder="Escreva sua mensagem..."
-      className="max-h-40 min-h-0 resize-none overflow-y-auto border-0 bg-transparent p-0 text-sm leading-5 text-primary shadow-none transition-[height] duration-150 focus-visible:ring-0"
+      className="max-h-40 min-h-0 resize-none overflow-y-auto border-0 bg-transparent p-0.5 text-sm leading-5 text-primary shadow-none transition-[height] duration-150 focus-visible:ring-0"
     />
   )
 }
