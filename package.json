@@ -1,0 +1,85 @@
+{
+  "name": "@inmediam/chat",
+  "version": "0.1.0",
+  "description": "Tela de chamados (chat) compartilhada entre os fronts da InMediam",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/InMediam/inmediam-chat"
+  },
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "tsc": "tsc",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:run": "vitest --run",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0"
+  },
+  "peerDependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@inmediam/ui": "^7.0.0",
+    "@tanstack/react-query": "^5.35.1",
+    "axios": "^1.6.8",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.2.0",
+    "framer-motion": "^12.34.0",
+    "lucide-react": "^1.30.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.51.4",
+    "react-router-dom": "^7.18.2",
+    "sonner": "^1.7.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@inmediam/lint": "^2.0.0",
+    "@inmediam/ui": "^7.0.1",
+    "@tanstack/react-query": "^5.35.1",
+    "@testing-library/jest-dom": "^6.4.5",
+    "@testing-library/react": "^14.3.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^20.11.17",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
+    "@vitest/ui": "^3.2.7",
+    "autoprefixer": "^10.4.14",
+    "axios": "^1.6.8",
+    "class-variance-authority": "^0.7.0",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.2.0",
+    "eslint": "^9.39.5",
+    "framer-motion": "^12.34.0",
+    "happy-dom": "^13.6.0",
+    "lucide-react": "^1.30.0",
+    "postcss": "^8.4.27",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.51.4",
+    "react-router-dom": "^7.18.2",
+    "sonner": "^1.7.4",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vitest": "^3.2.7",
+    "zod": "^3.22.4"
+  }
+}
