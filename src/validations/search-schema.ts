@@ -1,4 +1,4 @@
-import z from 'zod'
+import { z } from 'zod'
 
 const MIN_SEARCH_LENGTH = 3
 
