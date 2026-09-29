@@ -82,3 +82,6 @@ npm run tsc
 npm run lint
 npm run test:run
 ```
+
+Mudanças publicadas saem de changesets — veja o [CONTRIBUTING.md](CONTRIBUTING.md)
+para o fluxo de PR e release.
