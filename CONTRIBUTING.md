@@ -109,7 +109,8 @@ Os releases são automatizados e acontecem em dois momentos:
    do PR: sobe a versão no `package.json`, atualiza o `CHANGELOG.md` e sincroniza
    o `package-lock.json`. Revise esse commit junto com o resto do PR.
 2. **No merge na `main`** — o workflow `Release`
-   (`.github/workflows/release.yml`) roda `changeset publish`, que publica no npm
+   (`.github/workflows/release.yml`) roda `tsc`, `lint` e `test:run` e, se
+   passarem, `changeset publish`, que publica no npm
    toda versão do `package.json` que ainda não existe no registry, via
    **Trusted Publishing (OIDC)**, com provenance e sem token armazenado.
 
