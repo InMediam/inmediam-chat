@@ -2,11 +2,11 @@ import { recordViolation } from './violations'
 
 const WATCHED_WARNINGS = [
   'not wrapped in act',
+  'not configured to support act',
   'Missing `Description`',
   'forwardRef render functions',
   'Each child in a list should have a unique "key"',
-  'Warning: Failed prop type',
-  'validateDOMNesting',
+  'This will cause a hydration error',
 ]
 
 const MAX_DETAIL_LENGTH = 200

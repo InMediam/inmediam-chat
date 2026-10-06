@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { configure, prettyDOM } from '@testing-library/react'
 
 const CONTAINER_PRINT_LIMIT = Number(process.env.DEBUG_PRINT_LIMIT ?? 0)
