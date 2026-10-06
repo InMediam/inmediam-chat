@@ -16,7 +16,7 @@ ao merge do PR e à publicação.
 
 ## Configurando localmente
 
-**Requisitos:** Node.js 20+ (o `.mise.toml` fixa a versão).
+**Requisitos:** Node.js 24 (o `.mise.toml` fixa a versão).
 
 ```bash
 git clone git@github.com:InMediam/inmediam-chat.git

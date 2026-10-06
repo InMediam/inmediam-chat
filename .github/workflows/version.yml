@@ -40,9 +40,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # No-op quando não há changesets pendentes (o README.md do .changeset é ignorado).
+      # O changeset version (v3) sai com erro quando não há changesets pendentes,
+      # então só roda se houver algum .md além do README.md do .changeset.
       - name: Apply changesets
-        run: npm run version-packages
+        run: |
+          if find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | grep -q .; then
+            npm run version-packages
+          else
+            echo "Nenhum changeset pendente." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # O changeset version não atualiza a versão da raiz no package-lock.json.
       # Não quebra o npm ci, mas evita que o lockfile fique defasado a cada release.
