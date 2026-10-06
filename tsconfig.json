@@ -10,7 +10,8 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "vite/client"
     ],
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -24,8 +25,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": false
+    "esModuleInterop": true
   },
   "include": [
     "src",

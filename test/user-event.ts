@@ -1,3 +1,4 @@
+import { configure, getConfig } from '@testing-library/dom'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react'
 
@@ -9,6 +10,28 @@ export interface ActUserEvent {
   hover: (...args: Parameters<UserEvent['hover']>) => Promise<void>
   keyboard: (...args: Parameters<UserEvent['keyboard']>) => Promise<void>
   upload: (...args: Parameters<UserEvent['upload']>) => Promise<void>
+}
+
+/**
+ * Roda a interação dentro de um `act` que fica aberto até ela terminar.
+ *
+ * O user-event executa cada chamada no `asyncWrapper` do Testing Library, que
+ * desliga `IS_REACT_ACT_ENVIRONMENT` durante a interação. Com a fila deste
+ * `act` aberta, o React 19 avisa "The current testing environment is not
+ * configured to support act(...)" a cada update. Aqui o `asyncWrapper` só
+ * repassa a chamada, e o original volta no fim.
+ */
+function withinAct(interaction: () => Promise<void>) {
+  return act(async () => {
+    const { asyncWrapper } = getConfig()
+    configure({ asyncWrapper: (callback) => callback() })
+
+    try {
+      await interaction()
+    } finally {
+      configure({ asyncWrapper })
+    }
+  })
 }
 
 /**
@@ -28,10 +51,10 @@ export function setupUser(): ActUserEvent {
   const user = userEvent.setup()
 
   return {
-    click: (...args) => act(() => user.click(...args)),
-    type: (...args) => act(() => user.type(...args)),
-    hover: (...args) => act(() => user.hover(...args)),
-    keyboard: (...args) => act(() => user.keyboard(...args)),
-    upload: (...args) => act(() => user.upload(...args)),
+    click: (...args) => withinAct(() => user.click(...args)),
+    type: (...args) => withinAct(() => user.type(...args)),
+    hover: (...args) => withinAct(() => user.hover(...args)),
+    keyboard: (...args) => withinAct(() => user.keyboard(...args)),
+    upload: (...args) => withinAct(() => user.upload(...args)),
   }
 }
