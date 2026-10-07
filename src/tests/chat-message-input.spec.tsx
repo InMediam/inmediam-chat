@@ -1,6 +1,8 @@
 import { TooltipProvider } from '@inmediam/ui'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
+import { AxiosError, AxiosHeaders } from 'axios'
+import { act } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
@@ -32,7 +34,7 @@ function renderInput({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
 
-  return render(
+  const buildTree = () => (
     <QueryClientProvider client={queryClient}>
       <ChatProvider adapter={createChatAdapterStub(adapter)}>
         <TooltipProvider delayDuration={0} skipDelayDuration={0}>
@@ -43,8 +45,12 @@ function renderInput({
           </MemoryRouter>
         </TooltipProvider>
       </ChatProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   )
+
+  const view = render(buildTree())
+
+  return { ...view, queryClient, rerender: () => view.rerender(buildTree()) }
 }
 
 describe('ChatMessageInput', () => {
@@ -117,14 +123,43 @@ describe('ChatMessageInput', () => {
     expect(screen.getByRole('button', { name: 'Emoji' })).toBeInTheDocument()
   })
 
+  it('recarrega o status do chamado quando a API recusa o envio com 403', async () => {
+    const user = setupUser()
+    const { queryClient } = renderInput()
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries')
+    vi.mocked(sendMensagem).mockRejectedValue(
+      new AxiosError('Forbidden', '403', undefined, undefined, {
+        status: 403,
+        statusText: 'Forbidden',
+        headers: {},
+        config: { headers: new AxiosHeaders() },
+        data: {
+          message: 'Este chamado foi finalizado e não aceita novas mensagens.',
+        },
+      }),
+    )
+
+    await user.type(
+      screen.getByPlaceholderText('Escreva sua mensagem...'),
+      'Olá',
+    )
+    await user.click(screen.getByRole('button', { name: 'Enviar mensagem' }))
+
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['chamado', mockChamado.id],
+    })
+  })
+
   describe('com o chamado finalizado', () => {
     const chamadoFinalizado: Chamado = { ...mockChamado, status: 'fechado' }
 
     // O campo desabilitado não recebe ponteiro: o tooltip mora na caixa em volta.
     function getComposer() {
-      return screen
-        .getByPlaceholderText('Chamado finalizado')
-        .closest<HTMLElement>('[data-finalizado="true"]')!
+      const composer = screen
+        .getByRole('textbox')
+        .closest<HTMLElement>('[data-finalizado="true"]')
+      if (!composer) throw new Error('Caixa do input não encontrada')
+      return composer
     }
 
     it('desabilita o campo, o envio e os anexos', () => {
@@ -136,8 +171,40 @@ describe('ChatMessageInput', () => {
       ).toBeDisabled()
       expect(screen.getByRole('button', { name: 'Emoji' })).toBeDisabled()
       expect(
-        screen.queryByRole('button', { name: 'Adicionar anexo' }),
-      ).not.toBeInTheDocument()
+        screen.getByRole('button', { name: 'Adicionar anexo' }),
+      ).toBeDisabled()
+    })
+
+    it('desabilita o campo quando o chamado é finalizado com a tela aberta', async () => {
+      const user = setupUser()
+      const { rerender } = renderInput()
+
+      await user.type(
+        screen.getByPlaceholderText('Escreva sua mensagem...'),
+        'Olá',
+      )
+
+      useChamadoSelecionadoMock.mockReturnValue({ chamado: chamadoFinalizado })
+      rerender()
+
+      const input = screen.getByRole('textbox')
+      expect(input).toBeDisabled()
+      expect(input).toHaveValue('Olá')
+      expect(
+        screen.getByRole('button', { name: 'Enviar mensagem' }),
+      ).toBeDisabled()
+      expect(sendMensagem).not.toHaveBeenCalled()
+    })
+
+    it('mostra o tooltip ao focar a caixa pelo teclado', async () => {
+      renderInput({ chamado: chamadoFinalizado })
+
+      await act(async () => getComposer().focus())
+
+      expect(getComposer()).toHaveFocus()
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Este chamado foi finalizado e não aceita novas mensagens.',
+      )
     })
 
     it('explica no tooltip que o chamado pode ser reaberto', async () => {

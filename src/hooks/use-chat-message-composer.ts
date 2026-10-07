@@ -10,7 +10,10 @@ import { sendMensagem } from '../api/send-mensagem'
 import { uploadArquivoParaSpaces } from '../api/upload-para-spaces'
 import { getHttpErrorMessage } from '../utils/get-http-error-message'
 import { useChamadoAnexos } from './use-chamado-anexos'
-import { appendMensagemToCache } from './use-chamado-cache'
+import {
+  appendMensagemToCache,
+  invalidateChamadoStatus,
+} from './use-chamado-cache'
 import { useChamadosChat } from './use-chamados-chat'
 
 export type UploadPhase = 'presigning' | 'uploading' | 'saving'
@@ -65,12 +68,17 @@ export function useChatMessageComposer() {
       appendMensagemToCache(queryClient, variables.chamadoId, response.data)
       clearDraft(variables.chamadoId)
     },
-    onError(error) {
+    onError(error, variables) {
       if (!isAxiosError(error)) {
         toast.error('Erro desconhecido, tente novamente mais tarde')
         return
       }
       toast.error(getHttpErrorMessage(error, { 404: 'Chamado não encontrado' }))
+
+      // O 403 mais comum aqui é o chamado finalizado do outro lado.
+      if (error.response?.status === 403) {
+        invalidateChamadoStatus(queryClient, variables.chamadoId)
+      }
     },
   })
 

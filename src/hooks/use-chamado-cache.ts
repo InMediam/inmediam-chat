@@ -32,6 +32,14 @@ export function appendMensagemToCache(
   )
 }
 
+export function invalidateChamadoStatus(
+  queryClient: QueryClient,
+  chamadoId: number,
+) {
+  queryClient.invalidateQueries({ queryKey: ['chamado', chamadoId] })
+  queryClient.invalidateQueries({ queryKey: ['chamados', 'lista'] })
+}
+
 export function marcarChamadoLidoNoCache(
   queryClient: QueryClient,
   chamadoId: number,

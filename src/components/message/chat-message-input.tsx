@@ -70,6 +70,7 @@ export function ChatMessageInput() {
     <div
       className="rounded-xl border border-secondary bg-primary px-3.5 py-3 focus-within:border-primary data-[finalizado=true]:cursor-not-allowed"
       data-finalizado={isFinalizado}
+      tabIndex={isFinalizado ? 0 : undefined}
     >
       {hasAttachments && (
         <ChatMessageAttachments
@@ -115,18 +116,14 @@ export function ChatMessageInput() {
         onChange={handleFileChange}
       />
 
-      {isFinalizado ? (
-        <Tooltip>
-          <TooltipTrigger asChild>{composer}</TooltipTrigger>
-          <TooltipContent className="mb-2">
-            {capabilities.reopenChamado
-              ? FINALIZADO_REABRIR_TOOLTIP
-              : FINALIZADO_TOOLTIP}
-          </TooltipContent>
-        </Tooltip>
-      ) : (
-        composer
-      )}
+      <Tooltip open={isFinalizado ? undefined : false}>
+        <TooltipTrigger asChild>{composer}</TooltipTrigger>
+        <TooltipContent className="mb-2">
+          {capabilities.reopenChamado
+            ? FINALIZADO_REABRIR_TOOLTIP
+            : FINALIZADO_TOOLTIP}
+        </TooltipContent>
+      </Tooltip>
     </div>
   )
 }

@@ -22,10 +22,11 @@ export function ChatMessageActions({
 
   return (
     <div className="flex items-center gap-1">
-      {canAttach && !isSending && !disabled && (
+      {canAttach && !isSending && (
         <button
           type="button"
-          className="rounded-md p-1.5 text-fg-quaternary hover:text-fg-tertiary"
+          disabled={disabled}
+          className="rounded-md p-1.5 text-fg-quaternary hover:text-fg-tertiary disabled:pointer-events-none disabled:opacity-50"
           aria-label="Adicionar anexo"
           onMouseDown={handleAttachMouseDown}
         >
