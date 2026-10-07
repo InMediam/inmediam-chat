@@ -6,12 +6,16 @@ interface ChatMessageTextareaProps {
   value: string
   onChange: (value: string) => void
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void
+  placeholder: string
+  disabled: boolean
 }
 
 export function ChatMessageTextarea({
   value,
   onChange,
   onKeyDown,
+  placeholder,
+  disabled,
 }: ChatMessageTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -33,8 +37,9 @@ export function ChatMessageTextarea({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       onKeyDown={onKeyDown}
-      placeholder="Escreva sua mensagem..."
-      className="max-h-40 min-h-0 resize-none overflow-y-auto border-0 bg-transparent p-0.5 text-sm leading-5 text-primary shadow-none transition-[height] duration-150 focus-visible:ring-0"
+      placeholder={placeholder}
+      disabled={disabled}
+      className="max-h-40 min-h-0 resize-none overflow-y-auto border-0 bg-transparent p-0.5 text-sm leading-5 text-primary shadow-none transition-[height] duration-150 focus-visible:ring-0 disabled:pointer-events-none"
     />
   )
 }
