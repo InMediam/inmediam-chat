@@ -3,6 +3,7 @@ import { ArrowUp, Paperclip, Smile } from 'lucide-react'
 interface ChatMessageActionsProps {
   canAttach: boolean
   isSending: boolean
+  disabled: boolean
   onAttach: () => void
   onSend: () => void
 }
@@ -10,6 +11,7 @@ interface ChatMessageActionsProps {
 export function ChatMessageActions({
   canAttach,
   isSending,
+  disabled,
   onAttach,
   onSend,
 }: ChatMessageActionsProps) {
@@ -20,7 +22,7 @@ export function ChatMessageActions({
 
   return (
     <div className="flex items-center gap-1">
-      {canAttach && !isSending && (
+      {canAttach && !isSending && !disabled && (
         <button
           type="button"
           className="rounded-md p-1.5 text-fg-quaternary hover:text-fg-tertiary"
@@ -32,15 +34,16 @@ export function ChatMessageActions({
       )}
       <button
         type="button"
-        className="rounded-md p-1.5 text-fg-quaternary hover:text-fg-tertiary"
+        disabled={disabled}
+        className="rounded-md p-1.5 text-fg-quaternary hover:text-fg-tertiary disabled:pointer-events-none disabled:opacity-50"
         aria-label="Emoji"
       >
         <Smile className="h-4 w-4" />
       </button>
       <button
         type="button"
-        disabled={isSending}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-tertiary shadow-sm hover:bg-brand-primary disabled:opacity-50"
+        disabled={isSending || disabled}
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-tertiary shadow-sm hover:bg-brand-primary disabled:pointer-events-none disabled:opacity-50"
         aria-label="Enviar mensagem"
         onClick={onSend}
       >
