@@ -1,5 +1,31 @@
 # @inmediam/chat
 
+## 0.2.2
+
+### Patch Changes
+
+- 06e31c4: Ajustes de layout na tela de chamados:
+
+  - O menu de ações do chamado só mostra o separador abaixo de "Detalhes do
+    chamado" quando há uma ação de finalizar ou reabrir logo abaixo.
+  - A lista de chamados não desenha mais uma linha abaixo do último item nem
+    abaixo do estado vazio.
+  - No mobile a lista passa a ocupar a altura da tela e rolar por dentro: antes,
+    com mais chamados do que cabiam na tela, o fim da lista era cortado e a
+    paginação infinita não carregava a página seguinte.
+  - O skeleton do endereço no cabeçalho do chamado acompanha a largura
+    disponível e não passa mais por cima do badge de status no mobile.
+
+- df59895: No mobile (largura abaixo de 768px, o breakpoint do `useIsMobile` do
+  `@inmediam/ui`), os modais de abrir chamado, detalhes do chamado, finalizar e
+  reabrir passam a abrir como `Drawer` em vez de `Dialog`. No desktop nada muda.
+
+  Antes, o diálogo de detalhes tinha largura fixa de `30rem` e vazava da tela em
+  celulares, e o formulário de abrir chamado ficava espremido junto do teclado.
+  No drawer o conteúdo rola por dentro e os botões ocupam a largura toda.
+
+  Não há mudança de API: o app só precisa atualizar a versão.
+
 ## 0.2.1
 
 ### Patch Changes
