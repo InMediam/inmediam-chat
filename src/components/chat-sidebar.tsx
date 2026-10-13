@@ -23,7 +23,7 @@ export function ChatSidebar({ className }: ChatSidebarProps) {
   return (
     <aside
       className={cn(
-        'flex w-full shrink-0 flex-col border-b border-secondary bg-primary md:max-w-[22.5rem] md:border-b-0 md:border-r',
+        'flex min-h-0 w-full flex-1 flex-col bg-primary md:max-w-[22.5rem] md:flex-none md:border-r md:border-secondary',
         className,
       )}
     >

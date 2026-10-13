@@ -26,7 +26,10 @@ export function ChatConversationList() {
 
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="data-[pending=false]:hidden" data-pending={isPending}>
+      <div
+        className="divide-y divide-secondary data-[pending=false]:hidden"
+        data-pending={isPending}
+      >
         {Array.from({ length: SKELETON_ROWS }).map((_, index) => (
           <ChatConversationSkeleton key={index} />
         ))}
@@ -43,12 +46,14 @@ export function ChatConversationList() {
         </p>
       </div>
 
-      {chamados.map((chamado) => (
-        <ChatConversationItem key={chamado.id} chamado={chamado} />
-      ))}
+      <div className="divide-y divide-secondary">
+        {chamados.map((chamado) => (
+          <ChatConversationItem key={chamado.id} chamado={chamado} />
+        ))}
+      </div>
 
       <div
-        className="data-[fetching=false]:hidden"
+        className="divide-y divide-secondary border-t border-secondary data-[fetching=false]:hidden"
         data-fetching={isFetchingNextPage}
       >
         <ChatConversationSkeleton />

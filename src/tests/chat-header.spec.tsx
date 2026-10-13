@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
 import { setupUser } from '../../test/user-event'
+import type { ChatAdapter } from '../adapter/chat-adapter'
 import { ChatProvider } from '../adapter/chat-provider'
 import { ChatHeader } from '../components/chat-header'
 import { ChamadosChatProvider } from '../contexts/chamados-chat-context'
@@ -17,11 +18,11 @@ vi.mock('../hooks/use-chamado-selecionado', () => ({
   useChamadoSelecionado: useChamadoSelecionadoMock,
 }))
 
-function renderHeader(chamado: Chamado) {
+function renderHeader(chamado: Chamado, adapter: Partial<ChatAdapter> = {}) {
   useChamadoSelecionadoMock.mockReturnValue({ chamado })
 
   return render(
-    <ChatProvider adapter={createChatAdapterStub()}>
+    <ChatProvider adapter={createChatAdapterStub(adapter)}>
       <MemoryRouter initialEntries={['/chamados']}>
         <ChamadosChatProvider>
           <ChatHeader />
@@ -77,6 +78,40 @@ describe('ChatHeader', () => {
 
     expect(screen.getByText('Reabrir chamado')).toBeInTheDocument()
     expect(screen.queryByText('Finalizar chamado')).not.toBeInTheDocument()
+  })
+
+  it('separa detalhes das ações de status quando há uma abaixo', async () => {
+    const user = setupUser()
+    renderHeader(mockChamado)
+
+    await user.click(
+      screen.getByRole('button', { name: 'Mais ações do chamado' }),
+    )
+
+    expect(
+      screen.getByRole('menu').querySelector('[data-orientation="horizontal"]'),
+    ).toBeInTheDocument()
+  })
+
+  it('não mostra o separador quando detalhes é a única ação', async () => {
+    const user = setupUser()
+    renderHeader(mockChamado, {
+      capabilities: {
+        createChamado: true,
+        selectDestinatario: true,
+        finalizeChamado: false,
+        reopenChamado: false,
+      },
+    })
+
+    await user.click(
+      screen.getByRole('button', { name: 'Mais ações do chamado' }),
+    )
+
+    expect(screen.getByText('Detalhes do chamado')).toBeInTheDocument()
+    expect(
+      screen.getByRole('menu').querySelector('[data-orientation="horizontal"]'),
+    ).not.toBeInTheDocument()
   })
 
   it('renderiza o botão de voltar para a lista', () => {

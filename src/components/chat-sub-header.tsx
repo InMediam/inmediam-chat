@@ -21,7 +21,9 @@ export function ChatSubHeader() {
           </p>
         )}
 
-        {!imovel && isPending && <Skeleton className="h-5 w-96" />}
+        {!imovel && isPending && (
+          <Skeleton className="h-4 w-full max-w-96 md:h-5" />
+        )}
       </div>
 
       {chamado && <ChatStatusBadge status={chamado.status} />}

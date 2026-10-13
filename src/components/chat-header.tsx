@@ -31,6 +31,8 @@ export function ChatHeader() {
   const { chamado } = useChamadoSelecionado()
 
   const isFinalized = isChamadoFinalizado(chamado?.status)
+  const canReopen = isFinalized && capabilities.reopenChamado
+  const canFinalize = !isFinalized && capabilities.finalizeChamado
   const nome = chamado?.participante?.nome ?? ''
   const foto = chamado?.participante?.foto ?? undefined
   const tipo = getParticipanteTipoLabel(chamado?.participante?.tipo)
@@ -82,8 +84,8 @@ export function ChatHeader() {
             <Info className="h-4 w-4" />
             Detalhes do chamado
           </DropdownMenuItem>
-          <Separator />
-          {isFinalized && capabilities.reopenChamado && (
+          {(canReopen || canFinalize) && <Separator />}
+          {canReopen && (
             <DropdownMenuItem
               className="h-10 gap-2 px-4 text-sm/5 font-medium text-secondary"
               onSelect={() => openDialog(CHAMADO_DIALOG.REABRIR)}
@@ -92,7 +94,7 @@ export function ChatHeader() {
               Reabrir chamado
             </DropdownMenuItem>
           )}
-          {!isFinalized && capabilities.finalizeChamado && (
+          {canFinalize && (
             <DropdownMenuItem
               className="h-10 gap-2 px-4 text-sm/5 font-medium text-secondary"
               onSelect={() => openDialog(CHAMADO_DIALOG.FINALIZAR)}
