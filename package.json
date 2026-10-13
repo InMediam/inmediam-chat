@@ -1,6 +1,6 @@
 {
   "name": "@inmediam/chat",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tela de chamados (chat) compartilhada entre os fronts da InMediam",
   "license": "MIT",
   "type": "module",

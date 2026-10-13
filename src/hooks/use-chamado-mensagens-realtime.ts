@@ -2,7 +2,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 import { useChatAdapter } from '../adapter/use-chat-adapter'
-import { appendMensagemToCache } from './use-chamado-cache'
+import { MENSAGEM_TIPO } from '../entities/enum'
+import {
+  appendMensagemToCache,
+  invalidateChamadoStatus,
+} from './use-chamado-cache'
 import {
   type EchoMensagemPayload,
   payloadToMensagem,
@@ -24,6 +28,12 @@ export function useChamadoMensagensRealtime(chamadoId: number | null) {
     const handler = (payload: EchoMensagemPayload) => {
       const mensagem = payloadToMensagem(payload, currentUser)
       appendMensagemToCache(queryClient, chamadoId, mensagem)
+
+      // Finalizar e reabrir chegam como mensagem de sistema; sem refetch o
+      // input seguiria com o status antigo.
+      if (mensagem.tipo === MENSAGEM_TIPO.SISTEMA) {
+        invalidateChamadoStatus(queryClient, chamadoId)
+      }
     }
 
     channel.listen('.mensagem.criada', handler)
