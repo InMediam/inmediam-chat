@@ -7,10 +7,10 @@ import { CHAMADOS_CHAT_MOBILE_VIEW } from '../contexts/chamados-chat-context'
 import { useChamadoSelecionado } from '../hooks/use-chamado-selecionado'
 import { useChamadosChat } from '../hooks/use-chamados-chat'
 import { useChamadosList } from '../hooks/use-chamados-list'
-import { CreateChamadoDialog } from '../views/create/create-chamado-dialog'
-import { ChamadosDetailsDialog } from '../views/details/chamados-details-dialog'
-import { ChamadoFinalizarDialog } from '../views/finalizar/chamado-finalizar-dialog'
-import { ChamadoReabrirDialog } from '../views/reabrir/chamado-reabrir-dialog'
+import { CreateChamado } from '../views/create/create-chamado'
+import { ChamadosDetails } from '../views/details/chamados-details'
+import { ChamadoFinalizar } from '../views/finalizar/chamado-finalizar'
+import { ChamadoReabrir } from '../views/reabrir/chamado-reabrir'
 import { ChatEmptyState } from './chat-empty-state'
 import { ChatPanel } from './chat-panel'
 import { ChatSidebar } from './chat-sidebar'
@@ -74,10 +74,10 @@ export function ChatWorkspace({ className }: ChatWorkspaceProps) {
         {chamado && <ChatPanel key={chamado.id} className={panelClassName} />}
       </div>
 
-      {capabilities.createChamado && <CreateChamadoDialog />}
-      <ChamadosDetailsDialog />
-      <ChamadoFinalizarDialog />
-      <ChamadoReabrirDialog />
+      {capabilities.createChamado && <CreateChamado />}
+      <ChamadosDetails />
+      <ChamadoFinalizar />
+      <ChamadoReabrir />
     </>
   )
 }

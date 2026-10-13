@@ -3,13 +3,15 @@ import { render, screen, waitFor } from '@testing-library/react'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
 import { setupUser } from '../../test/user-event'
+import { setMobileViewport } from '../../test/viewport'
 import { ChatProvider } from '../adapter/chat-provider'
 import { createChamado } from '../api/create-chamado'
 import { getCategorias } from '../api/get-categorias'
-import { CreateChamadoDialog } from '../views/create/create-chamado-dialog'
+import { CreateChamado } from '../views/create/create-chamado'
 
-const { useChamadosChatMock } = vi.hoisted(() => ({
+const { useChamadosChatMock, closeDialog } = vi.hoisted(() => ({
   useChamadosChatMock: vi.fn(),
+  closeDialog: vi.fn(),
 }))
 
 vi.mock('../hooks/use-chamados-chat', () => ({
@@ -53,7 +55,7 @@ const fetchLocacoes = vi.fn()
 function renderDialog() {
   useChamadosChatMock.mockReturnValue({
     dialog: 'novo',
-    closeDialog: vi.fn(),
+    closeDialog,
     selectChamado: vi.fn(),
     locacaoId: undefined,
   })
@@ -65,7 +67,7 @@ function renderDialog() {
   return render(
     <QueryClientProvider client={queryClient}>
       <ChatProvider adapter={createChatAdapterStub({ fetchLocacoes })}>
-        <CreateChamadoDialog />
+        <CreateChamado />
       </ChatProvider>
     </QueryClientProvider>,
   )
@@ -74,6 +76,7 @@ function renderDialog() {
 describe('ChatNewDialog', () => {
   beforeEach(() => {
     useChamadosChatMock.mockReset()
+    closeDialog.mockReset()
     vi.mocked(getCategorias).mockReset()
     vi.mocked(getCategorias).mockResolvedValue(categorias)
     fetchLocacoes.mockReset()
@@ -85,6 +88,7 @@ describe('ChatNewDialog', () => {
     renderDialog()
 
     expect(screen.getByText('Abrir novo chamado')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).not.toHaveAttribute('data-vaul-drawer')
     await waitFor(() => expect(getCategorias).toHaveBeenCalled())
     await waitFor(() => expect(fetchLocacoes).toHaveBeenCalled())
   })
@@ -108,6 +112,31 @@ describe('ChatNewDialog', () => {
     expect(screen.getByText('Selecione o imóvel')).toBeInTheDocument()
     expect(screen.getByText('Selecione o destinatário')).toBeInTheDocument()
     expect(screen.getByText('Descreva o que aconteceu')).toBeInTheDocument()
+    expect(createChamado).not.toHaveBeenCalled()
+  })
+
+  it('fecha pelo botão de cancelar', async () => {
+    const user = setupUser()
+    renderDialog()
+
+    await waitFor(() => expect(getCategorias).toHaveBeenCalled())
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(closeDialog).toHaveBeenCalled()
+  })
+
+  it('abre como drawer no mobile e valida o formulário', async () => {
+    const user = setupUser()
+    setMobileViewport()
+    renderDialog()
+
+    expect(screen.getByText('Abrir novo chamado')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-vaul-drawer')
+    await waitFor(() => expect(getCategorias).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: /Enviar chamado/ }))
+
+    expect(await screen.findByText('Selecione a categoria')).toBeInTheDocument()
     expect(createChamado).not.toHaveBeenCalled()
   })
 })

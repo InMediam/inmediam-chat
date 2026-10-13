@@ -3,13 +3,15 @@ import { render, screen } from '@testing-library/react'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
 import { setupUser } from '../../test/user-event'
+import { setMobileViewport } from '../../test/viewport'
 import { ChatProvider } from '../adapter/chat-provider'
 import { updateChamadoStatus } from '../api/update-chamado-status'
-import { ChamadoFinalizarDialog } from '../views/finalizar/chamado-finalizar-dialog'
+import { ChamadoFinalizar } from '../views/finalizar/chamado-finalizar'
 import { mockChamado } from './fixtures'
 
-const { useChamadosChatMock } = vi.hoisted(() => ({
+const { useChamadosChatMock, closeDialog } = vi.hoisted(() => ({
   useChamadosChatMock: vi.fn(),
+  closeDialog: vi.fn(),
 }))
 
 vi.mock('../hooks/use-chamados-chat', () => ({
@@ -23,7 +25,7 @@ vi.mock('../api/update-chamado-status', () => ({
 }))
 
 function renderDialog(dialog: 'finalizar' | null = 'finalizar') {
-  useChamadosChatMock.mockReturnValue({ dialog, closeDialog: vi.fn() })
+  useChamadosChatMock.mockReturnValue({ dialog, closeDialog })
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -32,15 +34,16 @@ function renderDialog(dialog: 'finalizar' | null = 'finalizar') {
   return render(
     <QueryClientProvider client={queryClient}>
       <ChatProvider adapter={createChatAdapterStub()}>
-        <ChamadoFinalizarDialog />
+        <ChamadoFinalizar />
       </ChatProvider>
     </QueryClientProvider>,
   )
 }
 
-describe('ChamadoFinalizarDialog', () => {
+describe('ChamadoFinalizar', () => {
   beforeEach(() => {
     useChamadosChatMock.mockReset()
+    closeDialog.mockReset()
     vi.mocked(updateChamadoStatus).mockReset()
     vi.mocked(updateChamadoStatus).mockResolvedValue({ data: mockChamado })
   })
@@ -54,6 +57,7 @@ describe('ChamadoFinalizarDialog', () => {
     expect(screen.getByText('Abertura')).toBeInTheDocument()
     expect(screen.getByText(mockChamado.protocolo)).toBeInTheDocument()
     expect(screen.getByText(mockChamado.subtitulo)).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).not.toHaveAttribute('data-vaul-drawer')
   })
 
   it('fica fechado quando outro diálogo está ativo', () => {
@@ -87,5 +91,33 @@ describe('ChamadoFinalizarDialog', () => {
       chamadoId: mockChamado.id,
       status: 'fechado',
     })
+  })
+
+  it('abre como drawer no mobile', async () => {
+    const user = setupUser()
+    setMobileViewport()
+    renderDialog()
+
+    expect(
+      screen.getByText('Tem certeza que deseja finalizar este chamado?'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-vaul-drawer')
+
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: /Finalizar chamado/ }))
+
+    expect(updateChamadoStatus).toHaveBeenCalledWith(expect.anything(), {
+      chamadoId: mockChamado.id,
+      status: 'fechado',
+    })
+  })
+
+  it('fecha pelo botão de fechar', async () => {
+    const user = setupUser()
+    renderDialog()
+
+    await user.click(screen.getByRole('button', { name: 'Fechar' }))
+
+    expect(closeDialog).toHaveBeenCalled()
   })
 })

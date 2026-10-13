@@ -3,9 +3,10 @@ import { render, screen } from '@testing-library/react'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
 import { setupUser } from '../../test/user-event'
+import { setMobileViewport } from '../../test/viewport'
 import { ChatProvider } from '../adapter/chat-provider'
 import { updateChamadoStatus } from '../api/update-chamado-status'
-import { ChamadoReabrirDialog } from '../views/reabrir/chamado-reabrir-dialog'
+import { ChamadoReabrir } from '../views/reabrir/chamado-reabrir'
 import { mockChamado } from './fixtures'
 
 const chamadoFinalizado = {
@@ -14,8 +15,9 @@ const chamadoFinalizado = {
   finished_at: '2026-05-02T10:00:00.000000Z',
 }
 
-const { useChamadosChatMock } = vi.hoisted(() => ({
+const { useChamadosChatMock, closeDialog } = vi.hoisted(() => ({
   useChamadosChatMock: vi.fn(),
+  closeDialog: vi.fn(),
 }))
 
 vi.mock('../hooks/use-chamados-chat', () => ({
@@ -29,7 +31,7 @@ vi.mock('../api/update-chamado-status', () => ({
 }))
 
 function renderDialog(dialog: 'reabrir' | null = 'reabrir') {
-  useChamadosChatMock.mockReturnValue({ dialog, closeDialog: vi.fn() })
+  useChamadosChatMock.mockReturnValue({ dialog, closeDialog })
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -38,15 +40,16 @@ function renderDialog(dialog: 'reabrir' | null = 'reabrir') {
   return render(
     <QueryClientProvider client={queryClient}>
       <ChatProvider adapter={createChatAdapterStub()}>
-        <ChamadoReabrirDialog />
+        <ChamadoReabrir />
       </ChatProvider>
     </QueryClientProvider>,
   )
 }
 
-describe('ChamadoReabrirDialog', () => {
+describe('ChamadoReabrir', () => {
   beforeEach(() => {
     useChamadosChatMock.mockReset()
+    closeDialog.mockReset()
     vi.mocked(updateChamadoStatus).mockReset()
     vi.mocked(updateChamadoStatus).mockResolvedValue({
       data: chamadoFinalizado,
@@ -61,6 +64,7 @@ describe('ChamadoReabrirDialog', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Finalizado em')).toBeInTheDocument()
     expect(screen.getByText('02/05/2026')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).not.toHaveAttribute('data-vaul-drawer')
   })
 
   it('fica fechado quando outro diálogo está ativo', () => {
@@ -94,5 +98,33 @@ describe('ChamadoReabrirDialog', () => {
       chamadoId: mockChamado.id,
       status: 'reaberto',
     })
+  })
+
+  it('abre como drawer no mobile', async () => {
+    const user = setupUser()
+    setMobileViewport()
+    renderDialog()
+
+    expect(
+      screen.getByText('Tem certeza que deseja reabrir este chamado?'),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-vaul-drawer')
+
+    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('button', { name: /Reabrir chamado/ }))
+
+    expect(updateChamadoStatus).toHaveBeenCalledWith(expect.anything(), {
+      chamadoId: mockChamado.id,
+      status: 'reaberto',
+    })
+  })
+
+  it('fecha pelo botão de fechar', async () => {
+    const user = setupUser()
+    renderDialog()
+
+    await user.click(screen.getByRole('button', { name: 'Fechar' }))
+
+    expect(closeDialog).toHaveBeenCalled()
   })
 })

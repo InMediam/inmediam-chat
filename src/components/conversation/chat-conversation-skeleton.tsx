@@ -8,7 +8,7 @@ export function ChatConversationSkeleton({
   return (
     <div
       className={cn(
-        'flex w-full flex-col gap-4 border-b border-secondary bg-primary px-4 py-4',
+        'flex w-full flex-col gap-4 bg-primary px-4 py-4',
         className,
       )}
     >

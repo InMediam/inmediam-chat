@@ -23,7 +23,7 @@ export function ChatConversationItem({ chamado }: ChatConversationItemProps) {
       onClick={() => selectChamado(chamado.id)}
       data-active={isActive}
       className={cn(
-        'relative flex w-full min-w-0 flex-col gap-4 overflow-hidden border-b border-secondary bg-primary px-4 py-4 text-left transition-colors hover:bg-secondary',
+        'relative flex w-full min-w-0 flex-col gap-4 overflow-hidden bg-primary px-4 py-4 text-left transition-colors hover:bg-secondary',
         'data-[active=true]:bg-secondary',
       )}
       aria-label={chamado.titulo ?? ''}
