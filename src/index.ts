@@ -1,4 +1,5 @@
 export type {
+  ChamadoDraft,
   ChatAdapter,
   ChatCapabilities,
   ChatCopy,
@@ -7,6 +8,7 @@ export type {
   ChatDetailsTabOption,
   ChatRealtime,
   ChatRealtimeChannel,
+  DestinatarioExterno,
   FetchLocacoesParams,
 } from './adapter/chat-adapter'
 export { CHAT_DETAILS_TAB } from './adapter/chat-adapter'

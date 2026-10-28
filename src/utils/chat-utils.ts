@@ -1,4 +1,7 @@
-import type { ChatCurrentUser } from '../adapter/chat-adapter'
+import type {
+  ChatCurrentUser,
+  DestinatarioExterno,
+} from '../adapter/chat-adapter'
 import { MENSAGEM_TIPO } from '../entities/enum'
 import type {
   Chamado,
@@ -52,6 +55,15 @@ export function parseDestinatarioValue(value: string) {
   const [tipo, id] = value.split(':')
 
   return { tipo: tipo as ParticipanteTipo, id: Number(id) }
+}
+
+export function findDestinatarioExterno(
+  destinatario: string,
+  destinatariosExternos: DestinatarioExterno[] = [],
+) {
+  const { tipo } = parseDestinatarioValue(destinatario)
+
+  return destinatariosExternos.find((externo) => externo.tipo === tipo)
 }
 
 export function getMimeExtension(mime: string): string {
