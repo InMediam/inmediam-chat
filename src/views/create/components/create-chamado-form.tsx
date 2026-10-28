@@ -11,11 +11,11 @@ import {
 } from '@inmediam/ui'
 import { Controller, useFormContext } from 'react-hook-form'
 
+import type { DestinatarioExterno } from '../../../adapter/chat-adapter'
 import { useChatAdapter } from '../../../adapter/use-chat-adapter'
 import { useChatCopy } from '../../../adapter/use-chat-copy'
 import { useCategorias } from '../../../hooks/use-categorias'
 import type { AnexoPreview } from '../../../hooks/use-chamado-anexos'
-import { findDestinatarioExterno } from '../../../utils/chat-utils'
 import { upperCaseFirstLetter } from '../../../utils/formatter/text-formatter'
 import { ChamadoSchema } from '../../../validations/chamado-schema'
 import { CreateChamadoAnexosField } from './create-chamado-anexos-field'
@@ -23,17 +23,19 @@ import { CreateChamadoDestinatarioField } from './create-chamado-destinatario-fi
 import { CreateChamadoImovelField } from './create-chamado-imovel-field'
 
 interface CreateChamadoFormProps {
+  destinatarioExterno?: DestinatarioExterno
   previews: AnexoPreview[]
   onAddAnexos: (files: File[]) => void
   onRemoveAnexo: (index: number) => void
 }
 
 export function CreateChamadoForm({
+  destinatarioExterno,
   previews,
   onAddAnexos,
   onRemoveAnexo,
 }: CreateChamadoFormProps) {
-  const { capabilities, destinatariosExternos } = useChatAdapter()
+  const { capabilities } = useChatAdapter()
   const copy = useChatCopy()
   const {
     control,
@@ -49,10 +51,6 @@ export function CreateChamadoForm({
 
   const categoriaId = watch('categoria_id')
   const locacaoSelecionadaId = Number(watch('locacao_id')) || null
-  const destinatarioExterno = findDestinatarioExterno(
-    watch('destinatario'),
-    destinatariosExternos,
-  )
   const assuntos =
     categorias?.data.find((categoria) => String(categoria.id) === categoriaId)
       ?.assuntos ?? []

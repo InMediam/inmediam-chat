@@ -184,6 +184,7 @@ export function CreateChamadoContent() {
     >
       <FormProvider {...form}>
         <CreateChamadoForm
+          destinatarioExterno={destinatarioExterno}
           previews={anexos.previews}
           onAddAnexos={handleAddAnexos}
           onRemoveAnexo={handleRemoveAnexo}
