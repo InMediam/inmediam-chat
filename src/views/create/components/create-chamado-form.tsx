@@ -9,13 +9,12 @@ import {
   SelectValue,
   Textarea,
 } from '@inmediam/ui'
-import { useQuery } from '@tanstack/react-query'
 import { Controller, useFormContext } from 'react-hook-form'
 
+import type { DestinatarioExterno } from '../../../adapter/chat-adapter'
 import { useChatAdapter } from '../../../adapter/use-chat-adapter'
 import { useChatCopy } from '../../../adapter/use-chat-copy'
-import { useChatHttp } from '../../../adapter/use-chat-http'
-import { getCategorias } from '../../../api/get-categorias'
+import { useCategorias } from '../../../hooks/use-categorias'
 import type { AnexoPreview } from '../../../hooks/use-chamado-anexos'
 import { upperCaseFirstLetter } from '../../../utils/formatter/text-formatter'
 import { ChamadoSchema } from '../../../validations/chamado-schema'
@@ -24,18 +23,19 @@ import { CreateChamadoDestinatarioField } from './create-chamado-destinatario-fi
 import { CreateChamadoImovelField } from './create-chamado-imovel-field'
 
 interface CreateChamadoFormProps {
+  destinatarioExterno?: DestinatarioExterno
   previews: AnexoPreview[]
   onAddAnexos: (files: File[]) => void
   onRemoveAnexo: (index: number) => void
 }
 
 export function CreateChamadoForm({
+  destinatarioExterno,
   previews,
   onAddAnexos,
   onRemoveAnexo,
 }: CreateChamadoFormProps) {
   const { capabilities } = useChatAdapter()
-  const http = useChatHttp()
   const copy = useChatCopy()
   const {
     control,
@@ -45,11 +45,7 @@ export function CreateChamadoForm({
     formState: { errors },
   } = useFormContext<ChamadoSchema>()
 
-  const { data: categorias, isPending: isLoadingCategorias } = useQuery({
-    queryKey: ['chamados', 'categorias'],
-    queryFn: () => getCategorias(http),
-    staleTime: Infinity,
-  })
+  const { data: categorias, isPending: isLoadingCategorias } = useCategorias()
 
   const isEmptyCategorias = isLoadingCategorias || categorias?.data.length === 0
 
@@ -170,14 +166,22 @@ export function CreateChamadoForm({
         {errors.descricao && <HintText>{errors.descricao.message}</HintText>}
       </InputItemsWrapper>
 
-      <InputItemsWrapper className="w-full">
-        <Label htmlFor="anexos">Anexos</Label>
-        <CreateChamadoAnexosField
-          previews={previews}
-          onAdd={onAddAnexos}
-          onRemove={onRemoveAnexo}
-        />
-      </InputItemsWrapper>
+      {destinatarioExterno && (
+        <p className="rounded-lg border border-secondary bg-secondary px-3.5 py-3 text-sm text-tertiary">
+          {destinatarioExterno.notice}
+        </p>
+      )}
+
+      {!destinatarioExterno && (
+        <InputItemsWrapper className="w-full">
+          <Label htmlFor="anexos">Anexos</Label>
+          <CreateChamadoAnexosField
+            previews={previews}
+            onAdd={onAddAnexos}
+            onRemove={onRemoveAnexo}
+          />
+        </InputItemsWrapper>
+      )}
     </div>
   )
 }

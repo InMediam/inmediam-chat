@@ -3,9 +3,10 @@ import { Button } from '@inmediam/ui'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { useEffect, useState } from 'react'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import type { ChamadoDraft } from '../../adapter/chat-adapter'
 import { useChatAdapter } from '../../adapter/use-chat-adapter'
 import { useChatHttp } from '../../adapter/use-chat-http'
 import type { CreateChamadoBody } from '../../api/create-chamado'
@@ -14,10 +15,15 @@ import { gerarPresignedUrlsParaChamado } from '../../api/gerar-presigned-url'
 import type { AnexoRef } from '../../api/send-mensagem'
 import { uploadArquivoParaSpaces } from '../../api/upload-para-spaces'
 import { LoadingSpin } from '../../components/loading-spin'
+import { useCategorias } from '../../hooks/use-categorias'
 import { useChamadoAnexos } from '../../hooks/use-chamado-anexos'
 import { prependChamadoToCache } from '../../hooks/use-chamado-cache'
 import { useChamadosChat } from '../../hooks/use-chamados-chat'
-import { parseDestinatarioValue } from '../../utils/chat-utils'
+import {
+  findDestinatarioExterno,
+  parseDestinatarioValue,
+} from '../../utils/chat-utils'
+import { upperCaseFirstLetter } from '../../utils/formatter/text-formatter'
 import { getHttpErrorMessage } from '../../utils/get-http-error-message'
 import type { ChamadoSchema } from '../../validations/chamado-schema'
 import { getChamadoSchema } from '../../validations/chamado-schema'
@@ -26,8 +32,9 @@ import { CreateChamadoForm } from './components/create-chamado-form'
 export function CreateChamadoContent() {
   const queryClient = useQueryClient()
   const { closeDialog, locacaoId, selectChamado } = useChamadosChat()
-  const { capabilities } = useChatAdapter()
+  const { capabilities, destinatariosExternos } = useChatAdapter()
   const http = useChatHttp()
+  const { data: categorias } = useCategorias()
   const [isUploading, setIsUploading] = useState(false)
 
   const anexos = useChamadoAnexos({ withPreviewUrls: false })
@@ -47,7 +54,13 @@ export function CreateChamadoContent() {
     },
   })
 
-  const { setValue } = form
+  const { control, setValue } = form
+
+  const destinatario = useWatch({ control, name: 'destinatario' })
+  const destinatarioExterno = findDestinatarioExterno(
+    destinatario,
+    destinatariosExternos,
+  )
 
   useEffect(
     function seedLocacaoDaTela() {
@@ -102,7 +115,35 @@ export function CreateChamadoContent() {
     }))
   }
 
+  function buildChamadoDraft(data: ChamadoSchema): ChamadoDraft {
+    const categoria = categorias?.data.find(
+      (item) => String(item.id) === data.categoria_id,
+    )
+    const assunto = categoria?.assuntos.find(
+      (item) => String(item.id) === data.assunto_id,
+    )
+
+    return {
+      categoria: upperCaseFirstLetter({
+        text: categoria?.nome ?? '',
+        mode: 'only',
+      }),
+      assunto: upperCaseFirstLetter({
+        text: assunto?.descricao ?? '',
+        mode: 'only',
+      }),
+      locacaoId: Number(data.locacao_id),
+      descricao: data.descricao,
+    }
+  }
+
   async function handleSubmit(data: ChamadoSchema) {
+    if (destinatarioExterno) {
+      destinatarioExterno.onSubmit(buildChamadoDraft(data))
+      closeDialog()
+      return
+    }
+
     const files = anexos.previews.map((preview) => preview.file)
     let anexosPayload: AnexoRef[] | undefined
 
@@ -143,6 +184,7 @@ export function CreateChamadoContent() {
     >
       <FormProvider {...form}>
         <CreateChamadoForm
+          destinatarioExterno={destinatarioExterno}
           previews={anexos.previews}
           onAddAnexos={handleAddAnexos}
           onRemoveAnexo={handleRemoveAnexo}
@@ -165,7 +207,7 @@ export function CreateChamadoContent() {
           data-loading-disabled={isSubmitting}
         >
           <LoadingSpin data-pending={isSubmitting} />
-          Enviar chamado
+          {destinatarioExterno?.submitLabel ?? 'Enviar chamado'}
         </Button>
       </div>
     </form>

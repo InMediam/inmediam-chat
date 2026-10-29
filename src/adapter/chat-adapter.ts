@@ -61,6 +61,21 @@ export interface ChatRealtime {
   leave: (channelName: string) => void
 }
 
+export interface ChamadoDraft {
+  categoria: string
+  assunto: string
+  locacaoId: number
+  descricao: string
+}
+
+export interface DestinatarioExterno {
+  tipo: ParticipanteTipo
+  /** Aparece no lugar dos anexos, que não seguem para fora do chat. */
+  notice: string
+  submitLabel: string
+  onSubmit: (draft: ChamadoDraft) => void
+}
+
 export interface ChatAdapter {
   api: AxiosInstance
   /**
@@ -89,6 +104,12 @@ export interface ChatAdapter {
    * não pode depender de publicar versão nova.
    */
   destinatariosIndisponiveis?: ParticipanteTipo[]
+  /**
+   * Tipos de destinatário atendidos fora do chat. Com um deles escolhido o
+   * pacote não cria o chamado: entrega o rascunho para o app encaminhar pelo
+   * canal dele.
+   */
+  destinatariosExternos?: DestinatarioExterno[]
   fetchLocacoes: (params: FetchLocacoesParams) => Promise<LocacaoChamado[]>
   copy?: Partial<ChatCopy>
   detailsTabs?: ChatDetailsTabOption[]

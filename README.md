@@ -57,6 +57,7 @@ import { ChamadosChat, ChatProvider, PARTICIPANTE_TIPO } from '@inmediam/chat'
 | `onRealtimeReconnect` | avisa o pacote para revalidar o que se perdeu offline |
 | `capabilities` | esconde ações que a instalação não oferece |
 | `fetchLocacoes` | a lista de imóveis do formulário; o endpoint difere por app |
+| `destinatariosExternos` | destinatários atendidos fora do chat: com um deles escolhido, o envio entrega o rascunho para o app em vez de criar o chamado |
 | `copy` | sobrescreve textos (`DEFAULT_CHAT_COPY` tem os padrões) |
 | `detailsTabs` | quais abas de detalhe aparecem, e com que rótulo |
 
