@@ -23,6 +23,7 @@ import { ChatDateDivider } from '../chat-date-divider'
 import { ChatMessage } from '../chat-message'
 import { ChatUnreadDivider } from '../chat-unread-divider'
 import { ChatMessageSkeleton } from './chat-message-skeleton'
+import { ChatWallpaper } from './chat-wallpaper'
 
 export function ChatMessageFeed() {
   const queryClient = useQueryClient()
@@ -104,9 +105,10 @@ export function ChatMessageFeed() {
   })
 
   return (
-    <div className="relative min-h-0 flex-1">
+    <div className="relative min-h-0 flex-1 bg-secondary">
+      <ChatWallpaper />
       <div
-        className="h-full overflow-y-auto bg-primary px-6 py-6 data-[pending=false]:hidden"
+        className="relative h-full overflow-y-auto px-6 py-6 data-[pending=false]:hidden"
         data-pending={isLoadingDetail}
       >
         <div className="flex w-full flex-col gap-6">
@@ -122,7 +124,7 @@ export function ChatMessageFeed() {
         ref={feedRef}
         onScroll={handleScroll}
         data-pending={isLoadingDetail}
-        className="h-full overflow-y-auto bg-primary px-6 py-6 data-[pending=true]:hidden"
+        className="relative h-full overflow-y-auto px-6 py-6 data-[pending=true]:hidden"
       >
         {hasMoreMessages && <div ref={topSentinelRef} className="h-1" />}
 

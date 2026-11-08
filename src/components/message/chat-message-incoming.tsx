@@ -35,7 +35,7 @@ export function ChatMessageIncoming({
               {message.time}
             </span>
           </div>
-          <div className="w-full rounded-bl-lg rounded-br-lg rounded-tr-lg border border-secondary bg-tertiary px-3 py-2">
+          <div className="w-full rounded-bl-lg rounded-br-lg rounded-tr-lg border border-secondary bg-primary px-3 py-2">
             <p className="whitespace-pre-wrap text-base font-normal leading-6 text-primary [overflow-wrap:anywhere]">
               {message.body}
             </p>
