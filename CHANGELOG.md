@@ -1,5 +1,11 @@
 # @inmediam/chat
 
+## 0.4.0
+
+### Minor Changes
+
+- bf6efa4: A conversa do chamado ganha um fundo com padrão, no estilo do WhatsApp, que fica parado enquanto as mensagens rolam. Os balões passam a ter fundo branco para manter o contraste.
+
 ## 0.3.0
 
 ### Minor Changes
