@@ -36,6 +36,12 @@ export function invalidateChamadoStatus(
   queryClient: QueryClient,
   chamadoId: number,
 ) {
+  // Detalhe fora da tela é descartado: invalidado, ele reabriria mostrando o
+  // status antigo até o refetch, e entradas sem queryFn falhariam no refetch.
+  queryClient.removeQueries({
+    queryKey: ['chamado', chamadoId],
+    type: 'inactive',
+  })
   queryClient.invalidateQueries({ queryKey: ['chamado', chamadoId] })
   queryClient.invalidateQueries({ queryKey: ['chamados', 'lista'] })
 }

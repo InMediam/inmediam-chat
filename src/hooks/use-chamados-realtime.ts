@@ -8,7 +8,10 @@ import type { MensagemTipo } from '../entities/enum'
 import { MENSAGEM_TIPO } from '../entities/enum'
 import type { MensagemItem } from '../entities/interface'
 import type { ParticipanteTipo } from '../entities/tipo-participante'
-import { appendMensagemToCache } from './use-chamado-cache'
+import {
+  appendMensagemToCache,
+  invalidateChamadoStatus,
+} from './use-chamado-cache'
 import { chamadoMensagensQueryKey } from './use-chamado-mensagens'
 
 export interface EchoMensagemPayload {
@@ -72,11 +75,17 @@ export function useChamadosRealtime() {
     const channel = realtime.private(realtimeChannel)
 
     const handler = (payload: EchoMensagemPayload) => {
-      appendMensagemToCache(
-        queryClient,
-        payload.mensagem.chamado_id,
-        payloadToMensagem(payload, currentUser),
-      )
+      const chamadoId = payload.mensagem.chamado_id
+      const mensagem = payloadToMensagem(payload, currentUser)
+
+      appendMensagemToCache(queryClient, chamadoId, mensagem)
+
+      // Fora da conversa aberta, só este canal recebe o finalizar e o reabrir;
+      // sem invalidar o detalhe, o chamado volta do cache com o status antigo.
+      if (mensagem.tipo === MENSAGEM_TIPO.SISTEMA) {
+        invalidateChamadoStatus(queryClient, chamadoId)
+        return
+      }
 
       queryClient.invalidateQueries({ queryKey: ['chamados', 'lista'] })
     }

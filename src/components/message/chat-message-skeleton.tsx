@@ -28,7 +28,7 @@ export function ChatMessageSkeleton({
             <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-quaternary" />
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <div className="h-3.5 w-24 animate-pulse rounded bg-quaternary" />
-              <div className="h-14 w-full animate-pulse rounded-bl-lg rounded-br-lg rounded-tr-lg bg-tertiary" />
+              <div className="h-14 w-full animate-pulse rounded-bl-lg rounded-br-lg rounded-tr-lg bg-primary dark:bg-tertiary" />
             </div>
           </div>
         </div>
