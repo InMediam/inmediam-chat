@@ -28,7 +28,7 @@ export function ChatMessageOwn({ message }: ChatMessageOwnProps) {
             )}
           </div>
         </div>
-        <div className="rounded-bl-lg rounded-br-lg rounded-tl-lg border border-secondary bg-primary px-3 py-2">
+        <div className="rounded-bl-lg rounded-br-lg rounded-tl-lg border border-secondary bg-primary px-3 py-2 dark:bg-tertiary">
           <p className="whitespace-pre-wrap text-base font-normal leading-6 text-primary [overflow-wrap:anywhere]">
             {message.body}
           </p>
