@@ -1,4 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryObserver,
+} from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
@@ -52,14 +56,13 @@ function createRealtimeStub() {
   return { realtime, emitMensagem }
 }
 
-function renderRealtime() {
+function renderRealtime({ conversaAberta = false } = {}) {
   const { realtime, emitMensagem } = createRealtimeStub()
   const queryClient = new QueryClient()
   const fetchDetalhe = vi.fn().mockResolvedValue({
     data: { ...mockChamado, status: CHAMADO_STATUS.FECHADO },
   })
 
-  queryClient.setQueryDefaults(['chamado'], { queryFn: fetchDetalhe })
   queryClient.setQueryData(['chamado', mockChamado.id], { data: mockChamado })
   queryClient.setQueryData(LISTA_EM_ABERTO, { pages: [], pageParams: [] })
 
@@ -67,6 +70,14 @@ function renderRealtime() {
     realtimeChannel: 'user.1.chamados',
     getRealtime: () => realtime,
   })
+
+  if (conversaAberta) {
+    new QueryObserver(queryClient, {
+      queryKey: ['chamado', mockChamado.id],
+      queryFn: fetchDetalhe,
+      staleTime: Infinity,
+    }).subscribe(() => undefined)
+  }
 
   renderHook(() => useChamadosRealtime(), {
     wrapper: ({ children }) => (
@@ -76,12 +87,30 @@ function renderRealtime() {
     ),
   })
 
-  return { queryClient, fetchDetalhe, emitMensagem }
+  const listaInvalidada = () =>
+    queryClient.getQueryState(LISTA_EM_ABERTO)?.isInvalidated
+
+  return { queryClient, fetchDetalhe, emitMensagem, listaInvalidada }
 }
 
 describe('useChamadosRealtime', () => {
-  it('recarrega o detalhe do chamado fora da tela quando chega uma mensagem de sistema', async () => {
-    const { queryClient, emitMensagem } = renderRealtime()
+  it('descarta o detalhe em cache do chamado fora da tela quando chega uma mensagem de sistema', () => {
+    const { queryClient, fetchDetalhe, emitMensagem, listaInvalidada } =
+      renderRealtime()
+
+    emitMensagem(MENSAGEM_TIPO.SISTEMA)
+
+    expect(
+      queryClient.getQueryData(['chamado', mockChamado.id]),
+    ).toBeUndefined()
+    expect(fetchDetalhe).not.toHaveBeenCalled()
+    expect(listaInvalidada()).toBe(true)
+  })
+
+  it('recarrega o detalhe da conversa aberta quando chega uma mensagem de sistema', async () => {
+    const { queryClient, emitMensagem } = renderRealtime({
+      conversaAberta: true,
+    })
 
     emitMensagem(MENSAGEM_TIPO.SISTEMA)
 
@@ -90,15 +119,16 @@ describe('useChamadosRealtime', () => {
         data: { ...mockChamado, status: CHAMADO_STATUS.FECHADO },
       }),
     )
-    expect(queryClient.getQueryState(LISTA_EM_ABERTO)?.isInvalidated).toBe(true)
   })
 
-  it('só invalida a lista quando chega uma mensagem comum', () => {
-    const { queryClient, fetchDetalhe, emitMensagem } = renderRealtime()
+  it('mantém o detalhe em cache e só invalida a lista quando chega uma mensagem comum', () => {
+    const { queryClient, emitMensagem, listaInvalidada } = renderRealtime()
 
     emitMensagem(MENSAGEM_TIPO.USUARIO)
 
-    expect(fetchDetalhe).not.toHaveBeenCalled()
-    expect(queryClient.getQueryState(LISTA_EM_ABERTO)?.isInvalidated).toBe(true)
+    expect(queryClient.getQueryData(['chamado', mockChamado.id])).toEqual({
+      data: mockChamado,
+    })
+    expect(listaInvalidada()).toBe(true)
   })
 })

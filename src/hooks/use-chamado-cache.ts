@@ -36,16 +36,14 @@ export function invalidateChamadoStatus(
   queryClient: QueryClient,
   chamadoId: number,
 ) {
-  // `refetchType: 'all'` recarrega também o detalhe fora da tela, para ele não
-  // reabrir com o status antigo; `cancelRefetch: false` junta os dois canais.
-  queryClient.invalidateQueries(
-    { queryKey: ['chamado', chamadoId], refetchType: 'all' },
-    { cancelRefetch: false },
-  )
-  queryClient.invalidateQueries(
-    { queryKey: ['chamados', 'lista'] },
-    { cancelRefetch: false },
-  )
+  // Detalhe fora da tela é descartado: invalidado, ele reabriria mostrando o
+  // status antigo até o refetch, e entradas sem queryFn falhariam no refetch.
+  queryClient.removeQueries({
+    queryKey: ['chamado', chamadoId],
+    type: 'inactive',
+  })
+  queryClient.invalidateQueries({ queryKey: ['chamado', chamadoId] })
+  queryClient.invalidateQueries({ queryKey: ['chamados', 'lista'] })
 }
 
 export function marcarChamadoLidoNoCache(
