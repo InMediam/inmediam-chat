@@ -1,5 +1,15 @@
 # @inmediam/chat
 
+## 0.4.0
+
+### Minor Changes
+
+- 83b1ceb: A conversa do chamado ganha um fundo com padrão de ícones (casa, chave, documento, escudo, câmera, prédio, balão, código de barras e porta), no estilo do WhatsApp, com uma versão para o tema claro e outra para o escuro. O fundo fica parado enquanto as mensagens rolam. No tema claro, os balões e o skeleton do balão recebido passam a ser brancos (`bg-primary`) para se destacar do fundo; no escuro continuam `bg-tertiary`.
+
+### Patch Changes
+
+- d5c2fdb: O `useChamadosRealtime` passa a recarregar o detalhe do chamado quando chega uma mensagem de sistema (finalizado ou reaberto). Antes, se o chamado era finalizado enquanto o usuário estava em outra conversa, ao abri-lo ele aparecia com o status antigo e o envio liberado até o cache vencer.
+
 ## 0.3.0
 
 ### Minor Changes
