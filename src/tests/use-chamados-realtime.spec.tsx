@@ -1,16 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, renderHook } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 
 import { createChatAdapterStub } from '../../test/chat-adapter-stub'
 import type { ChatRealtime } from '../adapter/chat-adapter'
 import { ChatProvider } from '../adapter/chat-provider'
 import { MENSAGEM_TIPO, type MensagemTipo } from '../entities/enum'
+import { CHAMADO_STATUS } from '../entities/status'
 import { PARTICIPANTE_TIPO } from '../entities/tipo-participante'
 import {
   type EchoMensagemPayload,
   useChamadosRealtime,
 } from '../hooks/use-chamados-realtime'
 import { mockChamado } from './fixtures'
+
+const LISTA_EM_ABERTO = ['chamados', 'lista', 'em-aberto']
 
 function createRealtimeStub() {
   const listeners = new Map<string, (payload: EchoMensagemPayload) => void>()
@@ -52,7 +55,13 @@ function createRealtimeStub() {
 function renderRealtime() {
   const { realtime, emitMensagem } = createRealtimeStub()
   const queryClient = new QueryClient()
+  const fetchDetalhe = vi.fn().mockResolvedValue({
+    data: { ...mockChamado, status: CHAMADO_STATUS.FECHADO },
+  })
+
+  queryClient.setQueryDefaults(['chamado'], { queryFn: fetchDetalhe })
   queryClient.setQueryData(['chamado', mockChamado.id], { data: mockChamado })
+  queryClient.setQueryData(LISTA_EM_ABERTO, { pages: [], pageParams: [] })
 
   const adapter = createChatAdapterStub({
     realtimeChannel: 'user.1.chamados',
@@ -67,26 +76,29 @@ function renderRealtime() {
     ),
   })
 
-  const isDetalheInvalidado = () =>
-    queryClient.getQueryState(['chamado', mockChamado.id])?.isInvalidated
-
-  return { emitMensagem, isDetalheInvalidado }
+  return { queryClient, fetchDetalhe, emitMensagem }
 }
 
 describe('useChamadosRealtime', () => {
-  it('invalida o detalhe do chamado quando chega uma mensagem de sistema', () => {
-    const { emitMensagem, isDetalheInvalidado } = renderRealtime()
+  it('recarrega o detalhe do chamado fora da tela quando chega uma mensagem de sistema', async () => {
+    const { queryClient, emitMensagem } = renderRealtime()
 
     emitMensagem(MENSAGEM_TIPO.SISTEMA)
 
-    expect(isDetalheInvalidado()).toBe(true)
+    await waitFor(() =>
+      expect(queryClient.getQueryData(['chamado', mockChamado.id])).toEqual({
+        data: { ...mockChamado, status: CHAMADO_STATUS.FECHADO },
+      }),
+    )
+    expect(queryClient.getQueryState(LISTA_EM_ABERTO)?.isInvalidated).toBe(true)
   })
 
-  it('mantém o detalhe do chamado em cache quando chega uma mensagem comum', () => {
-    const { emitMensagem, isDetalheInvalidado } = renderRealtime()
+  it('só invalida a lista quando chega uma mensagem comum', () => {
+    const { queryClient, fetchDetalhe, emitMensagem } = renderRealtime()
 
     emitMensagem(MENSAGEM_TIPO.USUARIO)
 
-    expect(isDetalheInvalidado()).toBe(false)
+    expect(fetchDetalhe).not.toHaveBeenCalled()
+    expect(queryClient.getQueryState(LISTA_EM_ABERTO)?.isInvalidated).toBe(true)
   })
 })

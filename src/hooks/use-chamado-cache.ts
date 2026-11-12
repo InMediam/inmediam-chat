@@ -36,8 +36,16 @@ export function invalidateChamadoStatus(
   queryClient: QueryClient,
   chamadoId: number,
 ) {
-  queryClient.invalidateQueries({ queryKey: ['chamado', chamadoId] })
-  queryClient.invalidateQueries({ queryKey: ['chamados', 'lista'] })
+  // `refetchType: 'all'` recarrega também o detalhe fora da tela, para ele não
+  // reabrir com o status antigo; `cancelRefetch: false` junta os dois canais.
+  queryClient.invalidateQueries(
+    { queryKey: ['chamado', chamadoId], refetchType: 'all' },
+    { cancelRefetch: false },
+  )
+  queryClient.invalidateQueries(
+    { queryKey: ['chamados', 'lista'] },
+    { cancelRefetch: false },
+  )
 }
 
 export function marcarChamadoLidoNoCache(

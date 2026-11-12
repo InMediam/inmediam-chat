@@ -145,9 +145,10 @@ describe('ChatMessageInput', () => {
     )
     await user.click(screen.getByRole('button', { name: 'Enviar mensagem' }))
 
-    expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['chamado', mockChamado.id],
-    })
+    expect(invalidateQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ['chamado', mockChamado.id] }),
+      expect.anything(),
+    )
   })
 
   describe('com o chamado finalizado', () => {
