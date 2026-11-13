@@ -289,7 +289,7 @@ function buildSkyline(colors: SkylineColors) {
         .join('')}</g>`,
   )
 
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="560" viewBox="0 0 1600 560" preserveAspectRatio="xMidYMax slice"><defs>${fadingGradient('back', colors.backBuilding, 140)}${fadingGradient('front', colors.frontBuilding, 240)}<radialGradient id="glow" cx="50%" cy="100%" r="70%"><stop offset="0" stop-color="#F5C21B" stop-opacity="${colors.glowOpacity}"/><stop offset="1" stop-color="#F5C21B" stop-opacity="0"/></radialGradient></defs><rect width="1600" height="560" fill="url(#glow)"/>${back.join('')}${front.join('')}</svg>`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="560" viewBox="0 0 1600 560"><defs>${fadingGradient('back', colors.backBuilding, 140)}${fadingGradient('front', colors.frontBuilding, 240)}<radialGradient id="glow" cx="50%" cy="100%" r="70%"><stop offset="0" stop-color="#F5C21B" stop-opacity="${colors.glowOpacity}"/><stop offset="1" stop-color="#F5C21B" stop-opacity="0"/></radialGradient></defs><rect width="1600" height="560" fill="url(#glow)"/>${back.join('')}${front.join('')}</svg>`
 
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
 }
@@ -310,11 +310,12 @@ const DARK_SKYLINE = buildSkyline({
   glowOpacity: 0.07,
 })
 
-// `100% 100%` entrega o corte ao `xMidYMax slice` do SVG: a silhueta cobre a
-// largura e fica ancorada no rodapé em qualquer proporção da conversa.
+// Tamanho fixo, que só cresce em conversa com mais de 1600px de largura: escalar
+// pela altura dava zoom e fazia o fundo piscar toda vez que a conversa mudava de altura.
 const SKYLINE_STYLE = {
   backgroundRepeat: 'no-repeat',
-  backgroundSize: '100% 100%',
+  backgroundPosition: 'center bottom',
+  backgroundSize: 'max(100%, 1600px) auto',
 }
 
 export function ChatWallpaper() {

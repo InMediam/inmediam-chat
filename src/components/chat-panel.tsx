@@ -4,6 +4,7 @@ import { ChatHeader } from './chat-header'
 import { ChatSubHeader } from './chat-sub-header'
 import { ChatMessageFeed } from './message/chat-message-feed'
 import { ChatMessageInput } from './message/chat-message-input'
+import { ChatWallpaper } from './message/chat-wallpaper'
 
 interface ChatPanelProps {
   className?: string
@@ -19,8 +20,11 @@ export function ChatPanel({ className }: ChatPanelProps) {
     >
       <ChatHeader />
       <ChatSubHeader />
-      <ChatMessageFeed />
-      <ChatMessageInput />
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <ChatWallpaper />
+        <ChatMessageFeed />
+        <ChatMessageInput />
+      </div>
     </section>
   )
 }

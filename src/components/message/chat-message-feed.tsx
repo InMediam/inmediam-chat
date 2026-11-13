@@ -23,7 +23,6 @@ import { ChatDateDivider } from '../chat-date-divider'
 import { ChatMessage } from '../chat-message'
 import { ChatUnreadDivider } from '../chat-unread-divider'
 import { ChatMessageSkeleton } from './chat-message-skeleton'
-import { ChatWallpaper } from './chat-wallpaper'
 
 export function ChatMessageFeed() {
   const queryClient = useQueryClient()
@@ -106,7 +105,6 @@ export function ChatMessageFeed() {
 
   return (
     <div className="relative min-h-0 flex-1">
-      <ChatWallpaper />
       <div
         className="relative h-full overflow-y-auto px-6 py-6 data-[pending=false]:hidden"
         data-pending={isLoadingDetail}

@@ -105,7 +105,7 @@ export function ChatMessageInput() {
   )
 
   return (
-    <div className="bg-secondary px-4 pb-5 pt-3 md:px-6">
+    <div className="relative px-4 pb-5 pt-3 md:px-6">
       <input
         ref={fileInputRef}
         type="file"
